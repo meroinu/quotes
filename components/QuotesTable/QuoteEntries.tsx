@@ -63,13 +63,11 @@ const getTickersList = (opts: {
   };
   limit?: number;
 }): TickersListItem[] => {
-  const { tickers, symbols, filter, limit } = opts;
+  const { tickers, symbols, filter: { criteria, order }, limit } = opts;
 
   if (!tickers) {
     return [];
   }
-
-  const { criteria, order } = filter;
 
   /** Object with full tickers data */
   let tickersList = Object.entries(tickers).map(([symbol, tickerData]) => ({

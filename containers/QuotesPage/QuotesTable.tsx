@@ -108,7 +108,7 @@ export const QuotesTable = ({ limit }: Props): JSX.Element => {
         method: 'subscribe',
         ch: 'ticker/1s/batch',
         /**
-         * Some weird type thing in the socket hook
+         * Some weird type bug in the socket hook
          * so ingore
          */
         // @ts-ignore

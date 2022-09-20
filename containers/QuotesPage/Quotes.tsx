@@ -3,6 +3,7 @@ import { useContext, useState } from 'react';
 import { ThemeContext } from '../../context/ThemeContext';
 import { Button } from '../../components/common/Button';
 import { QuotesTable } from './QuotesTable';
+import { ThemeType } from '../../context/types';
 
 export const Quotes = () => {
   const [limit, setLimit] = useState<number | undefined>(50);
@@ -20,7 +21,7 @@ export const Quotes = () => {
     <div>
       <Head>
         <title>Exchange Quotes</title>
-        <meta name="description" content="Mamkin trader" />
+        <meta name="description" content="Quotes" />
         <meta lang='en'/>
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -30,7 +31,7 @@ export const Quotes = () => {
         
         <div className="control-buttons">
           <Button onClick={setTheme} className="control-button">
-            Theme
+            {theme === ThemeType.Dark ? 'Switch to light' : 'Switch to dark'}
           </Button>
           <Button onClick={handleChangeLimit} className="control-button">
             {limit ? 'Show all' : 'Show 50'}
