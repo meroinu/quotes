@@ -12,7 +12,7 @@ import {
 
 import { QuoteTableColumnTitle } from '../../components/QuotesTable/QuoteTableColumnTitle';
 import { COLUMNS } from '../../components/QuotesTable/constants';
-import { usePrevious } from '../../hooks';
+import { usePrevious } from '../../hooks/usePrevious';
 import { QuoteEntries } from '../../components/QuotesTable/QuoteEntries';
 
 type Props = {
