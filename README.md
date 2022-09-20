@@ -1,6 +1,7 @@
 # Quotes
 ### Build
 (don't forget to install node_modules)
+
 `yarn build` or `npm run build`
 
 ### Start
