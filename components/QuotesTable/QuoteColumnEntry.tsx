@@ -1,4 +1,4 @@
-import { memo, useContext } from 'react';
+import { useContext } from 'react';
 import { themes, ThemeContext } from '../../context/ThemeContext';
 import { QuoteEntryUpdateType } from '../../types/quotes';
 
@@ -16,7 +16,7 @@ export const TickerColumnEntry = ({
   return (
     <td>
       {value || '—'}
-      
+
       <style jsx>
         {`
           td {
@@ -39,5 +39,5 @@ export const TickerColumnEntry = ({
         `}
       </style>
     </td>
-  )
+  );
 };

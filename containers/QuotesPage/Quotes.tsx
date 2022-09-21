@@ -13,7 +13,7 @@ export const Quotes = () => {
     /**
      * Currently only toggle between 50 or all (undefined)
      * For more values will be needed to pass an argument
-    */
+     */
     setLimit((prev) => (prev ? undefined : 50));
   };
 
@@ -22,13 +22,13 @@ export const Quotes = () => {
       <Head>
         <title>Exchange Quotes</title>
         <meta name="description" content="Quotes" />
-        <meta lang='en'/>
+        <meta lang="en" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main>
         <h1>Exchange Quotes</h1>
-        
+
         <div className="control-buttons">
           <Button onClick={setTheme} className="control-button">
             {theme === ThemeType.Dark ? 'Switch to light' : 'Switch to dark'}
@@ -52,3 +52,5 @@ export const Quotes = () => {
     </div>
   );
 };
+
+export default Quotes;

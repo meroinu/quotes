@@ -20,7 +20,7 @@ export const Button = ({ children, onClick, className }: Props) => {
       <button role="button" onClick={handleClick} className={className}>
         {children}
       </button>
-      
+
       <style jsx>{`
         button {
           display: inline-block;

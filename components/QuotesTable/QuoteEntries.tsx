@@ -14,7 +14,7 @@ import { useContext } from 'react';
 type Props = {
   tickers: Tickers;
   previousTickersState: Tickers;
-  symbols: Symbols;
+  symbols: Symbols | null;
   columns: QuotesTableColumn[];
   filterCriteria: QuotesTableColumn;
   order: OrderType;
@@ -32,22 +32,28 @@ const tickersListSortHandler = ({
   criteria: QuotesTableColumn;
   order: OrderType;
 }) => {
-  const { [criteria]: aValue } = aTicker;
-  const { [criteria]: bValue } = bTicker;
+  const { [criteria]: aTickerValue } = aTicker;
+  const { [criteria]: bTickerValue } = bTicker;
 
-  const isNumeric = !isNaN(Number(aValue)) && !isNaN(Number(bValue));
+  const isNumeric =
+    !isNaN(Number(aTickerValue)) || !isNaN(Number(bTickerValue));
   const isDESC = order === OrderType.DESC;
 
+  /** Typical naming for comparison functions */
   let a: string;
   let b: string;
 
-  /** local compare behaves differently for strings and numbers, so */
-  if (isNumeric) {
-    a = (isDESC ? aValue : bValue) || '';
-    b = (isDESC ? bValue : aValue) || '';
+  /** local compare behaves differently for strings and numbers, so.
+   * a = bTickerValue and b = aTickerValue if only one (ONE) of the conditions is true (isNumeric or isDESC),
+   * otherwise a = aTickerValue and b = bTickerValue.
+   * Twisted logic but... well, it's working :(
+   */
+  if ((isNumeric || isDESC) && !(isNumeric && isDESC)) {
+    a = bTickerValue || '';
+    b = aTickerValue || '';
   } else {
-    a = (isDESC ? bValue : aValue) || '';
-    b = (isDESC ? aValue : bValue) || '';
+    a = aTickerValue || '';
+    b = bTickerValue || '';
   }
 
   return b.localeCompare(a, undefined, { numeric: isNumeric });
@@ -63,7 +69,12 @@ const getTickersList = (opts: {
   };
   limit?: number;
 }): TickersListItem[] => {
-  const { tickers, symbols, filter: { criteria, order }, limit } = opts;
+  const {
+    tickers,
+    symbols,
+    filter: { criteria, order },
+    limit,
+  } = opts;
 
   if (!tickers) {
     return [];
@@ -111,7 +122,9 @@ const getEntryUpdateType = (
     return;
   }
 
-  return Number(current) < Number(previous) ? QuoteEntryUpdateType.Down : QuoteEntryUpdateType.Up;
+  return Number(current) < Number(previous)
+    ? QuoteEntryUpdateType.Down
+    : QuoteEntryUpdateType.Up;
 };
 
 export const QuoteEntries = ({
@@ -140,7 +153,10 @@ export const QuoteEntries = ({
               const currentValue = tickerEntry[column];
               const previousValue =
                 previousTickersState?.[symbol]?.[column as keyof TickerData];
-              const updateType = getEntryUpdateType(currentValue, previousValue);
+              const updateType = getEntryUpdateType(
+                currentValue,
+                previousValue
+              );
 
               return (
                 <TickerColumnEntry
@@ -153,7 +169,7 @@ export const QuoteEntries = ({
           </tr>
         );
       })}
-      
+
       <style jsx>{`
         tr:nth-child(odd) {
           background: ${themes[theme].colors.table.rowDark};

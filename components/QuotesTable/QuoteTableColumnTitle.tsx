@@ -30,7 +30,7 @@ export const QuoteTableColumnTitle = ({
           {showOrderIcon ? (filterOrder === OrderType.ASC ? '🔼' : '🔽') : null}
         </span>
       </div>
-      
+
       <style jsx>{`
         th {
           padding: 8px 16px;

@@ -71,9 +71,23 @@ export type FMFWSocketTickerData = {
   L: number; // Last trade identifier
 };
 
-export type FMFWSocketTickerMsg = {
+export type FMFWSocketTickerMsgData = {
   [symbol: string]: FMFWSocketTickerData;
 };
+
+export type FMFWSocketErrorMsg = {
+  error: {
+    code: number;
+    message: string;
+    description: string;
+  };
+};
+
+export type FMFWSuccessSocketMsg = {
+  data: FMFWSocketTickerMsgData;
+};
+
+export type FMFWSocketMsg = FMFWSocketErrorMsg | FMFWSuccessSocketMsg;
 
 export type QuotesTableColumn =
   | 'ticker'

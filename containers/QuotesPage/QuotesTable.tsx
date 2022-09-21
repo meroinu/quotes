@@ -3,7 +3,10 @@ import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { getTickers } from '../../clientApi/getTickers';
 import { getSymbols } from '../../clientApi/getSymbols';
 import {
-  FMFWSocketTickerMsg,
+  FMFWSocketErrorMsg,
+  FMFWSocketMsg,
+  FMFWSocketTickerMsgData,
+  FMFWSuccessSocketMsg,
   OrderType,
   QuotesTableColumn,
   Symbols,
@@ -19,7 +22,7 @@ type Props = {
   limit?: number;
 };
 
-const handleSocketTickerMsg = (msgData: FMFWSocketTickerMsg) => {
+const handleSocketTickerMsgData = (msgData: FMFWSocketTickerMsgData) => {
   if (!msgData) {
     return {};
   }
@@ -49,8 +52,9 @@ export const QuotesTable = ({ limit }: Props): JSX.Element => {
     useState<QuotesTableColumn>('last');
   const [filterOrder, setFilterOrder] = useState<OrderType>(OrderType.DESC);
 
-  /** Simple socket error handling */
+  /** Simple error handling */
   const [error, setError] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const handleChangeFilter = (
     criteria: QuotesTableColumn,
@@ -71,8 +75,10 @@ export const QuotesTable = ({ limit }: Props): JSX.Element => {
    * symbols for pretty name (base/quote currencies).
    * */
   const fetchTickers = useCallback(async () => {
-    const snapshot = await getTickers();
-    setTickers(snapshot);
+    try {
+      const snapshot = await getTickers();
+      setTickers(snapshot);
+    } catch (e: unknown) {}
   }, []);
 
   const fetchSymbols = useCallback(async () => {
@@ -81,24 +87,28 @@ export const QuotesTable = ({ limit }: Props): JSX.Element => {
   }, []);
 
   /** Open websocket conenction */
-  const { readyState, sendJsonMessage, lastJsonMessage } = useWebSocket<{
-    data: FMFWSocketTickerMsg;
-  }>('wss://api.fmfw.io/api/3/ws/public', {
-    /** Simple reconnect (one time, just to demonstrate) */
-    retryOnError: true,
-    reconnectAttempts: 1,
-    reconnectInterval: 1,
-    onReconnectStop: () => {
-      setError(true);
-    },
-  });
+  const { readyState, sendJsonMessage, lastJsonMessage } =
+    useWebSocket<FMFWSocketMsg>('wss://api.fmfw.io/api/3/ws/public', {
+      /** Simple reconnect (one time, just to demonstrate) */
+      retryOnError: true,
+      reconnectAttempts: 1,
+      reconnectInterval: 1,
+      onReconnectStop: () => {
+        setLoading(false);
+        setError(true);
+      },
+    });
 
   useEffect(() => {
     fetchTickers();
   }, [fetchTickers]);
 
   useEffect(() => {
-    fetchSymbols();
+    try {
+      fetchSymbols();
+    } catch (e: unknown) {
+      setError(true);
+    }
   }, [fetchSymbols]);
 
   /** Subscribe to batch updates */
@@ -123,8 +133,17 @@ export const QuotesTable = ({ limit }: Props): JSX.Element => {
   /** Update tickers on socket msg */
   useEffect(() => {
     if (lastJsonMessage) {
-      const updatedTickers = handleSocketTickerMsg(lastJsonMessage.data);
-      setTickers((prev) => ({ ...prev, ...updatedTickers }));
+      const { error: msgError } = lastJsonMessage as FMFWSocketErrorMsg;
+      const { data: msgData } = lastJsonMessage as FMFWSuccessSocketMsg;
+
+      if (msgError) {
+        setLoading(true);
+      } else {
+        const updatedTickers = handleSocketTickerMsgData(msgData);
+
+        setTickers((prev) => ({ ...prev, ...updatedTickers }));
+        setLoading(false);
+      }
     }
   }, [lastJsonMessage]);
 
@@ -145,7 +164,7 @@ export const QuotesTable = ({ limit }: Props): JSX.Element => {
       </thead>
 
       <tbody>
-        {!error && readyState !== ReadyState.OPEN ? ( // waiting for data
+        {loading ? ( // waiting for data
           <tr>
             <td colSpan={COLUMNS.length}>
               ⏳ Please be kind and wait a little ⏳
@@ -161,7 +180,7 @@ export const QuotesTable = ({ limit }: Props): JSX.Element => {
           </tr>
         ) : null}
 
-        {!error && symbols && tickers ? ( // data is ok
+        {!error && tickers ? ( // data is ok
           <QuoteEntries
             columns={COLUMNS}
             tickers={tickers}
@@ -173,7 +192,7 @@ export const QuotesTable = ({ limit }: Props): JSX.Element => {
           />
         ) : null}
       </tbody>
-      
+
       <style jsx>{`
         table {
           width: 1024px;

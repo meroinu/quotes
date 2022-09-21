@@ -6,9 +6,13 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<FMFWSymbols>
 ) {
-  const { data: symbols } = await axios.get<FMFWSymbols>(
-    'https://api.fmfw.io/api/3/public/symbol'
-  );
+  try {
+    const { data: symbols } = await axios.get<FMFWSymbols>(
+      'https://api.fmfw.io/api/3/public/symbol'
+    );
 
-  res.status(200).json(symbols);
+    res.status(200).json(symbols);
+  } catch (e: unknown) {
+    res.status(500).json({});
+  }
 }
